@@ -39,16 +39,16 @@ class MyWebServer(SocketServer.BaseRequestHandler):
 
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        #Does not apear to be needed, but left here in case tests require it
-        #print ("Got a request of: %s\n" % self.data)
+        # Does not apear to be needed, but left here in case tests require it
+        # print ("Got a request of: %s\n" % self.data)
         # not an efficient way of testing the request type
         self.reqType = self.data.split(' ')[0]
         if(self.reqType == "GET"):
             self.get(self.data)
         else:
             self.nonGet(self.data)
-        #Does not apear to be needed, but left here in case tests require it
-        #self.request.sendall("OK")
+        # Does not apear to be needed, but left here in case tests require it
+        # self.request.sendall("OK")
 
     def get(self, request):
         tokens = request.split(' ')
@@ -62,21 +62,22 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             mimetype = "text/html"
         elif(reqLoc.endswith(".text")):
             mimetype = "application/plain"
-        # Could use osPath.isDir(), but this seems faster
-        # * Assume all directories have an index.html as spec. indicates
-        elif(reqLoc.endswith("/")):
-            reqLoc = reqLoc + "index.html"
+        # placed last because it is the slowest check
+        elif(osPath.isdir(reqLoc)):
+            print("FOUND HREE", reqLoc)
+            if(reqLoc.endswith("/")):
+                reqLoc = reqLoc + "index.html"
+            else:
+                reqLoc = reqLoc + "/index.html"
             mimetype = "text/html"
-        #Unsure of best way to handle types outside of spec.
+        # Unsure of best way to handle types outside of spec.
         else:
             mimetype = "application/plain"
 
         reqLoc = osPath.abspath(reqLoc)
 
-        # Should probably be something other than 404, but provided tests
-        # indicate 404 is the correct response
         if(osPath.join(getcwd(), "www/") not in reqLoc):
-            response = httpVersion + " 404 Not FOUND!\r\n" + \
+            response = httpVersion + " 404 Not Found\r\n" + \
                 "Conetnt-Type: " + mimetype + "\r\n" + \
                 reqLoc + "\r\n" + "\r\n"
             self.request.send(response)
@@ -92,13 +93,13 @@ class MyWebServer(SocketServer.BaseRequestHandler):
                 self.request.send(response)
 
             except IOError:
-                response = httpVersion + " 404 Not FOUND!\r\n" + \
+                response = httpVersion + " 404 Not Found\r\n" + \
                     "Conetnt-Type: " + mimetype + "\r\n" + "\r\n" + \
                     reqLoc + "\r\n" + "\r\n"
                 self.request.send(response)
 
     def nonGet(self, request):
-        response = "405 Method Not Allowed!\r\n" + \
+        response = "405 Method Not Allowed\r\n" + \
             "Allow: GET\r\n"
         self.request.sendall(response)
 
