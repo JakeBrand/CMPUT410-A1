@@ -64,7 +64,6 @@ class MyWebServer(SocketServer.BaseRequestHandler):
             mimetype = "application/plain"
         # placed last because it is the slowest check
         elif(osPath.isdir(reqLoc)):
-            print("FOUND HREE", reqLoc)
             if(reqLoc.endswith("/")):
                 reqLoc = reqLoc + "index.html"
             else:
